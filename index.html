@@ -46,6 +46,10 @@
     return d;
   }, function(error, data) {
     if (error) throw error;
+    data = data.map((d, i) => {
+      d.group = i;
+      return d;
+    })
 
     const color = d3.scaleOrdinal(
       data.map((d, i) => {
