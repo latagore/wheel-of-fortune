@@ -78,9 +78,6 @@
         .text(function(d) { return d.data.group; });
 
     arc.append("image")
-        // .attr("transform", function(d) { return "translate(" + img.centroid(d) + ")"; })
-        // .attr("dy", "0.35em")
-
         .attr("xlink:href", function(d) { return d.data.imageURL; })
         .attr("width", iconSize)
         .attr("height", iconSize)
@@ -93,13 +90,25 @@
         })
         .attr("clip-path", "url(#clip)");
 
-    // spinner
-    //   .transition()
-    //   .ease(d3.easeExpInOut)
-    //   .duration(5000)
-    //   .attrTween("transform", function tween(d, i, a) {
-    //     return d3.interpolateString("rotate(0, 0, 0)", `rotate(${360*10}, 0, 0)`);
-    //   })
+    svg.on("click", () => {
+      let startAngle = spinner.attr("data-rotate") || 0;
+      startAngle = startAngle % 360; // don't let the angle get too big
+
+      const randomAngle = (Math.random() * 10 + 7) * 360;
+      endAngle = startAngle + randomAngle;
+
+      spinner
+        .transition()
+        .ease(d3.easeExpInOut)
+        .duration(5000)
+        .attrTween("data-rotate", function tween(d, i, a) {
+          return d3.interpolate(startAngle, endAngle);
+        })
+        .attrTween("transform", function tween(d, i, a) {
+          return d3.interpolateString(`rotate(${startAngle}, 0, 0)`, `rotate(${endAngle}, 0, 0)`);
+        })
+    })
+
   });
 
   </script>
