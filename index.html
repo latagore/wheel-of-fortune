@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    .arc text {
+      font: 10px sans-serif;
+      text-anchor: middle;
+    }
+
+    .arc path {
+      stroke: #fff;
+    }
+  </style>
+
+</head>
+<body>
+  <svg width="500" height="500"></svg>
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script>
+
+  var svg = d3.select("svg"),
+      width = +svg.attr("width"),
+      height = +svg.attr("height"),
+      radius = Math.min(width, height) / 2,
+      g = svg.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
+      spinner = g.append("g");
+
+  const startColor = d3.color("hsl(0, 100%, 50%)");
+  const endColor = d3.color("hsl(359, 100%, 50%)");
+  var colorInterpolator = d3.interpolateHslLong(startColor, endColor);
+
+  var pie = d3.pie()
+      .value(function(d) { return d.size; });
+
+  var path = d3.arc()
+      .outerRadius(radius - 10)
+      .innerRadius(0);
+
+  var img = d3.arc()
+      .outerRadius(radius - 60)
+      .innerRadius(radius - 60);
+  var iconSize = 50;
+
+  d3.csv("data.csv", function(d) {
+    d.size = +d.size;
+    return d;
+  }, function(error, data) {
+    if (error) throw error;
+
+    const color = d3.scaleOrdinal(
+      data.map((d, i) => {
+        return colorInterpolator(i/data.length);
+      })
+    );
+
+    var arc = spinner.selectAll(".arc")
+      .data(pie(data))
+      .enter().append("g")
+        .attr("class", "arc");
+
+    arc.append("path")
+        .attr("d", path)
+        .attr("fill", function(d) { return color(d.data.group); });
+
+    arc.append("text")
+        .attr("transform", function(d) { return "translate(" + img.centroid(d) + ")"; })
+        .attr("dy", "0.35em")
+        .text(function(d) { return d.data.group; });
+
+    arc.append("image")
+        // .attr("transform", function(d) { return "translate(" + img.centroid(d) + ")"; })
+        // .attr("dy", "0.35em")
+        .attr("xlink:href", function(d) { return d.data.imageURL; })
+        .attr("width", iconSize)
+        .attr("height", iconSize)
+        .attr("transform", function(d) {
+          return `
+            translate(${img.centroid(d)})
+            rotate(${((d.endAngle - d.startAngle) / 2 + d.startAngle) * 180 / Math.PI - 180})
+            translate(${-iconSize/2} ${-iconSize/2})
+          `;
+        });
+
+    // spinner
+    //   .transition()
+    //   .ease(d3.easeExpInOut)
+    //   .duration(5000)
+    //   .attrTween("transform", function tween(d, i, a) {
+    //     return d3.interpolateString("rotate(0, 0, 0)", `rotate(${360*10}, 0, 0)`);
+    //   })
+  });
+
+  </script>
+</body>
+</html>
