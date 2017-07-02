@@ -25,6 +25,13 @@
       g = svg.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
       spinner = g.append("g");
 
+
+  var iconSize = 70;
+  var defs = svg.append("defs"),
+    circle = defs.append("circle").attr("id", "circle").attr("cx", iconSize/2).attr("cy", iconSize/2).attr("r", iconSize/2),
+    clipPath = defs.append("clipPath").attr("id", "clip");
+  clipPath.append("use").attr("xlink:href", "#circle");
+
   const startColor = d3.color("hsl(0, 100%, 50%)");
   const endColor = d3.color("hsl(359, 100%, 50%)");
   var colorInterpolator = d3.interpolateHslLong(startColor, endColor);
@@ -37,9 +44,8 @@
       .innerRadius(0);
 
   var img = d3.arc()
-      .outerRadius(radius - 60)
-      .innerRadius(radius - 60);
-  var iconSize = 50;
+      .outerRadius(radius - 70)
+      .innerRadius(radius - 70);
 
   d3.csv("data.csv", function(d) {
     d.size = +d.size;
@@ -74,6 +80,7 @@
     arc.append("image")
         // .attr("transform", function(d) { return "translate(" + img.centroid(d) + ")"; })
         // .attr("dy", "0.35em")
+
         .attr("xlink:href", function(d) { return d.data.imageURL; })
         .attr("width", iconSize)
         .attr("height", iconSize)
@@ -83,7 +90,8 @@
             rotate(${((d.endAngle - d.startAngle) / 2 + d.startAngle) * 180 / Math.PI - 180})
             translate(${-iconSize/2} ${-iconSize/2})
           `;
-        });
+        })
+        .attr("clip-path", "url(#clip)");
 
     // spinner
     //   .transition()
